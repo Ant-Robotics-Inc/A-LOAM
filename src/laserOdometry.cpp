@@ -54,6 +54,7 @@
 
 #include "aloam_velodyne/common.h"
 #include "aloam_velodyne/tic_toc.h"
+#include <aloam_velodyne/param_passer.h>
 #include "lidarFactor.hpp"
 
 #define DISTORTION 0
@@ -216,6 +217,18 @@ int main(int argc, char **argv)
 
     int frameCount = 0;
     ros::Rate rate(100);
+
+    hagen_planner::ParamPasser::Ptr passer;
+    passer.reset(new hagen_planner::ParamPasser(nh));
+    Eigen::MatrixXd k_Q(2, 6); 
+    bool passed = passer->passing_matrix("covariance_matrix_for_odometry", k_Q);
+    if(!passed){
+        double q_cov = 1;
+        std::cout<< "Count not pass the data" << std::endl;
+        k_Q << q_cov, q_cov, q_cov, q_cov, q_cov, q_cov, q_cov, q_cov, q_cov, q_cov, q_cov, q_cov;
+    }
+    std::cout<< "Covariance mat: "<< k_Q << std::endl;
+
 
     while (ros::ok())
     {
@@ -519,6 +532,22 @@ int main(int argc, char **argv)
             laserOdometry.pose.pose.position.x = t_w_curr.x();
             laserOdometry.pose.pose.position.y = t_w_curr.y();
             laserOdometry.pose.pose.position.z = t_w_curr.z();
+
+            laserOdometry.pose.covariance.at(0) = k_Q(0,0);
+            laserOdometry.pose.covariance.at(7) = k_Q(0,1);
+            laserOdometry.pose.covariance.at(14) = k_Q(0,2);
+            laserOdometry.pose.covariance.at(21) = k_Q(0,3);
+            laserOdometry.pose.covariance.at(28) = k_Q(0,4);
+            laserOdometry.pose.covariance.at(35) = k_Q(0,5);
+
+            laserOdometry.twist.covariance.at(0) = k_Q(1,0);
+            laserOdometry.twist.covariance.at(7) = k_Q(1,1);
+            laserOdometry.twist.covariance.at(14) = k_Q(1,2);
+            laserOdometry.twist.covariance.at(21) = k_Q(1,3);
+            laserOdometry.twist.covariance.at(28) = k_Q(1,4);
+            laserOdometry.twist.covariance.at(35) = k_Q(1,5);
+
+
             pubLaserOdometry.publish(laserOdometry);
 
             geometry_msgs::PoseStamped laserPose;

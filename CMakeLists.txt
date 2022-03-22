@@ -16,6 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   image_transport
   cv_bridge
   tf
+  xmlrpcpp
 )
 
 #find_package(Eigen3 REQUIRED)
@@ -40,7 +41,7 @@ catkin_package(
 add_executable(ascanRegistration src/scanRegistration.cpp)
 target_link_libraries(ascanRegistration ${catkin_LIBRARIES} ${PCL_LIBRARIES})
 
-add_executable(alaserOdometry src/laserOdometry.cpp)
+add_executable(alaserOdometry src/laserOdometry.cpp src/param_passer.cpp)
 target_link_libraries(alaserOdometry ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${CERES_LIBRARIES})
 
 add_executable(alaserMapping src/laserMapping.cpp)

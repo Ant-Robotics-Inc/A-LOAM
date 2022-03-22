@@ -1,0 +1,2 @@
+covariance_matrix_for_odometry: [5, 5, .0, 0.0, 0.0, .0.6,
+                                 0.0, 0, .0, 0.0, 0.0, .0]
